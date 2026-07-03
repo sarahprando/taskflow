@@ -16,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "tasks")
@@ -23,7 +24,9 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank
     private String title;
+    @NotBlank
     private String description;
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
@@ -35,6 +38,17 @@ public class Task {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Task() {
+    }
+
+    public Task(String title, String description, String status, String priority, String deadline) {
+        this.title = title;
+        this.description = description;
+        this.status = TaskStatus.valueOf(status);
+        this.priority = TaskPriority.valueOf(priority);
+        this.deadline = LocalDateTime.parse(deadline);
+    }
 
     public Long getId() {
         return id;

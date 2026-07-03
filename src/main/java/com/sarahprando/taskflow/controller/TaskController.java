@@ -3,6 +3,8 @@ package com.sarahprando.taskflow.controller;
 import com.sarahprando.taskflow.entity.Task;
 import com.sarahprando.taskflow.service.TaskService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +26,7 @@ public class TaskController {
     }
 
     @PostMapping
-    List<Task> create(@RequestBody Task task) {
+    List<Task> create(@RequestBody @Valid Task task) {
         return taskService.create(task);
     }
 
@@ -34,7 +36,7 @@ public class TaskController {
     }
 
     @PutMapping
-    List<Task> update(@RequestBody Task task) {
+    List<Task> update(@RequestBody @Valid Task task) {
         return taskService.update(task);
 
     }
