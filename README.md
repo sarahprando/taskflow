@@ -193,7 +193,7 @@ Update your credentials in `application.properties`.
 ### 3️⃣ Run the application
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
 ### 4️⃣ Access the API

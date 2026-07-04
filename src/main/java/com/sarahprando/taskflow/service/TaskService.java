@@ -3,7 +3,9 @@ package com.sarahprando.taskflow.service;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.sarahprando.taskflow.entity.Task;
 import com.sarahprando.taskflow.repository.TaskRepository;
@@ -16,9 +18,14 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public List<Task> create(Task task) {
+    public Task create(Task task) {
         taskRepository.save(task);
-        return list();
+        return task;
+    }
+
+    public Task get(Long id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
 
     public List<Task> list() {
@@ -26,14 +33,15 @@ public class TaskService {
         return taskRepository.findAll(sort);
     }
 
-    public List<Task> update(Task task) {
+    public Task update(Task task) {
         taskRepository.save(task);
-        return list();
-
+        return task;
     }
 
-    public List<Task> delete(Long id) {
+    public void delete(Long id) {
+        if (!taskRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+        }
         taskRepository.deleteById(id);
-        return list();
     }
 }

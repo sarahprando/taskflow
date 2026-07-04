@@ -42,13 +42,11 @@ class TaskflowApplicationTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.jsonPath("$").isArray()
-				.jsonPath("$.length()").isEqualTo(1)
-				.jsonPath("$[0].title").isEqualTo(task.getTitle())
-				.jsonPath("$[0].description").isEqualTo(task.getDescription())
-				.jsonPath("$[0].status").isEqualTo(task.getStatus())
-				.jsonPath("$[0].priority").isEqualTo(task.getPriority())
-				.jsonPath("$[0].deadline").isEqualTo(task.getDeadline());
+				.jsonPath("$.title").isEqualTo(task.getTitle())
+				.jsonPath("$.description").isEqualTo(task.getDescription())
+				.jsonPath("$.status").isEqualTo(task.getStatus())
+				.jsonPath("$.priority").isEqualTo(task.getPriority())
+				.jsonPath("$.deadline").isEqualTo(task.getDeadline());
 	}
 
 	@Test
@@ -65,6 +63,71 @@ class TaskflowApplicationTests {
 								"2024-06-30T12:00:00"))
 				.exchange()
 				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void testGetByIdTaskSuccess() {
+		var task = new Task(
+				"task 1",
+				"description 1",
+				"PENDING",
+				"MEDIUM",
+				"2024-06-30T12:00:00");
+
+		var createdTask = webTestClient
+				.post()
+				.uri("/tasks")
+				.bodyValue(task)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Task.class)
+				.returnResult()
+				.getResponseBody();
+
+		webTestClient
+				.get()
+				.uri("/tasks/{id}", createdTask.getId())
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.id").isEqualTo(createdTask.getId());
+
+	}
+
+	@Test
+	void testGetByIdTaskInvalidRoute() {
+		webTestClient
+				.get()
+				.uri("/tasks/")
+				.exchange()
+				.expectStatus().isNotFound()
+				.expectBody();
+	}
+
+	@Test
+	void testGetByIdTaskNotFound() {
+		var task = new Task(
+				"task 1",
+				"description 1",
+				"PENDING",
+				"MEDIUM",
+				"2024-06-30T12:00:00");
+
+		var createdTask = webTestClient
+				.post()
+				.uri("/tasks")
+				.bodyValue(task)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Task.class)
+				.returnResult()
+				.getResponseBody();
+
+		webTestClient
+				.get()
+				.uri("/tasks/{id}", createdTask.getId() + 1)
+				.exchange()
+				.expectStatus().isNotFound();
 	}
 
 	@Test
@@ -151,22 +214,23 @@ class TaskflowApplicationTests {
 				"MEDIUM",
 				"2024-06-30T12:00:00");
 
-		webTestClient.post()
+		var createdTask = webTestClient
+				.post()
 				.uri("/tasks")
 				.bodyValue(task)
-				.exchange();
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Task.class)
+				.returnResult()
+				.getResponseBody();
 
-		webTestClient.get()
-				.uri("/tasks")
+		webTestClient
+				.get()
+				.uri("/tasks/{id}", createdTask.getId())
 				.exchange()
 				.expectBody()
-				.jsonPath("$[0].id").value(id -> {
+				.jsonPath("$.id").isEqualTo(createdTask.getId());
 
-					webTestClient.delete()
-							.uri("/tasks/{id}", id)
-							.exchange()
-							.expectStatus().isOk();
-				});
 	}
 
 	@Test
@@ -177,5 +241,31 @@ class TaskflowApplicationTests {
 				.exchange()
 				.expectStatus().isNotFound()
 				.expectBody();
+	}
+
+	@Test
+	void testDeleteTaskNotFound() {
+		var task = new Task(
+				"task 1",
+				"description 1",
+				"PENDING",
+				"MEDIUM",
+				"2024-06-30T12:00:00");
+
+		var createdTask = webTestClient
+				.post()
+				.uri("/tasks")
+				.bodyValue(task)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Task.class)
+				.returnResult()
+				.getResponseBody();
+
+		webTestClient
+				.delete()
+				.uri("/tasks/{id}", createdTask.getId() + 1)
+				.exchange()
+				.expectStatus().isNotFound();
 	}
 }

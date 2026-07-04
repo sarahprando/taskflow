@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +27,13 @@ public class TaskController {
     }
 
     @PostMapping
-    List<Task> create(@RequestBody @Valid Task task) {
+    Task create(@RequestBody @Valid Task task) {
         return taskService.create(task);
+    }
+
+    @GetMapping("/{id}")
+    Task get(@PathVariable("id") Long id) {
+        return taskService.get(id);
     }
 
     @GetMapping
@@ -36,13 +42,14 @@ public class TaskController {
     }
 
     @PutMapping
-    List<Task> update(@RequestBody @Valid Task task) {
+    Task update(@RequestBody @Valid Task task) {
         return taskService.update(task);
 
     }
 
     @DeleteMapping("/{id}")
-    List<Task> delete(@PathVariable("id") Long id) {
-        return taskService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        taskService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
